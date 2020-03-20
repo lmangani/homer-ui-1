@@ -48,6 +48,7 @@ import {
     ResultChartWidgetComponent,
     ResultWidgetComponent,
     RsearchWidgetComponent,
+    AlertWidgetComponent,
     SettingClockWidgetComponent,
     SettingGeneralIframeWidgetComponent,
     SettingIframeWidgetComponent,
@@ -56,8 +57,8 @@ import {
     SettingProtosearchWidgetComponent,
     SettingResultChartWidgetComponent,
     SettingResultWidgetComponent,
-    SettingsAceEditorWidgetComponent
-   
+    SettingsAceEditorWidgetComponent,
+    SettingAlertWidgetComponent,
 
 } from '@app/components/widgets';
 
@@ -172,6 +173,7 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     
         ResultWidgetComponent,
         RsearchWidgetComponent,
+        AlertWidgetComponent,
         SettingClockWidgetComponent,
         SettingGeneralIframeWidgetComponent,
         SettingIframeWidgetComponent,
@@ -181,6 +183,7 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
         SettingResultChartWidgetComponent,
         SettingResultWidgetComponent,
         SettingsAceEditorWidgetComponent,
+        SettingAlertWidgetComponent,
     
         /** dialogs */
         DialogAdvancedComponent,
@@ -253,6 +256,7 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
         ResultChartWidgetComponent,
         ResultWidgetComponent,
         RsearchWidgetComponent,
+        AlertWidgetComponent,
         SettingClockWidgetComponent,
         SettingGeneralIframeWidgetComponent,
         SettingIframeWidgetComponent,
@@ -262,6 +266,7 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
         SettingResultChartWidgetComponent,
         SettingResultWidgetComponent,
         SettingsAceEditorWidgetComponent,
+        SettingAlertWidgetComponent,
 
         /** dashboard */
         AddDashboardDialogComponent,

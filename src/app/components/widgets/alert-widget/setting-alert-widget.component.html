@@ -1,0 +1,66 @@
+<mat-toolbar class="title" color="primary">
+  <div>Settings</div>
+  <button mat-icon-button (click)="onNoClick()">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-toolbar>
+<div mat-dialog-content>
+  <mat-form-field>
+    <mat-label>Title</mat-label>
+    <input matInput [(ngModel)]="data.title">
+  </mat-form-field>
+</div>
+<div mat-dialog-content>
+  <mat-form-field>
+    <mat-label>Request type</mat-label>
+    <mat-select [(value)]="data.requestType">
+      <mat-option *ngFor="let requestType of arrayRequestType" [value]="requestType" (click)="onChange">
+        {{requestType}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+<div mat-dialog-content>
+  <mat-form-field>
+    <mat-label>Alert URL</mat-label>
+    <input matInput [(ngModel)]="data.alertUrl">
+  </mat-form-field>
+  <button title="Add param" mat-icon-button (click)="addParams()"><mat-icon>add</mat-icon></button>
+</div>
+<span>
+  <div mat-dialog-content  *ngFor="let key of data.keyList; let i = index; trackBy: trackByFn">
+    <mat-form-field  *ngIf="data.requestType==='POST'" >
+      <mat-label>Key</mat-label>
+      <input matInput [(ngModel)]="data.keyList[i]">
+    </mat-form-field>
+    <mat-form-field style="margin-left: 10px; margin-right: 10px;" *ngIf="data.requestType==='POST'" >
+      <mat-label>Value</mat-label>
+      <input matInput [(ngModel)]="data.valueList[i]">
+    </mat-form-field>
+    <mat-form-field style="width: 40px; margin-right: 10px;">
+      <mat-select  [(ngModel)]="data.comparsionTypeList[i]" >
+        <mat-option  *ngFor="let type of comparsionTypeList | keyvalue" [value]="type.value">
+          {{type.key}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Expected</mat-label>
+      <input matInput [(ngModel)]="data.expectedList[i]">
+    </mat-form-field>
+    
+    <button title="Delete param" mat-icon-button (click)="deleteParams(i)"><mat-icon>close</mat-icon></button>
+  </div>
+</span>
+<div mat-dialog-content>
+  <mat-form-field>
+    <mat-label>Audio URL</mat-label>
+    <input matInput [(ngModel)]="data.audioUrl">
+  </mat-form-field>
+  <button title="Test Audio" mat-icon-button (click)="testAudio()"><mat-icon>play_circle_filled</mat-icon></button>
+</div>
+
+<div mat-dialog-actions style="float: right; margin-bottom: 0rem;">
+  <button mat-raised-button (click)="onNoClick()">Cancel</button>
+  <button mat-raised-button color="primary" [mat-dialog-close]="data" cdkFocusInitial>Ok</button>
+</div>
