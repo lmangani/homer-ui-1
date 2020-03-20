@@ -11,8 +11,35 @@ import * as html2canvas from 'html2canvas';
 })
 export class TabFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('flowtitle', {static: false}) flowtitle;
+    _isSimplify = false;
+
+    @Input()
+    set isSimplify(val: boolean) {
+        this._isSimplify = val;
+    }
+    get isSimplify() {
+        return this._isSimplify;
+    }
+
+    _isSimplifyPort = false;
+
+    @Input()
+    set isSimplifyPort(val: boolean) {
+        this._isSimplifyPort = val;
+    }
+    get isSimplifyPort() {
+        return this._isSimplifyPort;
+    }
+
     @Input() callid: any;
-    @Input() dataItem: any;
+    _dataItem: any;
+    @Input() set dataItem(val) {
+        this._dataItem = val;
+        setTimeout(this.initData.bind(this));
+    }
+    get dataItem () {
+        return this._dataItem;
+    }
     @Input() set exportAsPNG(val) {
         if(val) {
             this.isExport = true;
@@ -36,8 +63,6 @@ export class TabFlowComponent implements OnInit, AfterViewInit, OnDestroy {
     _interval: any;
     labels: Array<any> = [];
 
-
-
     constructor() { }
 
     ngAfterViewInit() {
@@ -55,12 +80,41 @@ export class TabFlowComponent implements OnInit, AfterViewInit, OnDestroy {
         clearInterval(this._interval);
     }
     ngOnInit() {
+        this.initData();
+    }
+    initData() {
         this.color_sid = Functions.getColorByString(this.callid);
 
-        /* sort it */
-        this.dataItem.data.hosts = this.sortProperties(this.dataItem.data.hosts, 'position', true, false);
+        const IpList = ([].concat(...this.dataItem.data.calldata.map(i => [i.srcId, i.dstId]))).reduce((a, b) => {
+            if (!a.includes(b)) {
+                a.push(b);
+            }
+            return a;
+        }, []);
 
-        this.aliasTitle = Object.keys(this.dataItem.data.hosts).map( i => ({ ip: i, alias: this.dataItem.data.alias[i] }));
+        let hosts = Functions.cloneObject(this.dataItem.data.hosts);
+
+        /* sort it */
+        hosts = this.sortProperties(hosts, 'position', true, false);
+
+        let increment = 0;
+        Object.keys(hosts).map(i => {
+            if (!IpList.includes(i)) {
+                delete hosts[i];
+            } else {
+                hosts[i].position = increment;
+                increment++;
+            }
+        });
+
+        this.aliasTitle = Object.keys(hosts).map( i => {
+            const alias = this.dataItem.data.alias[i];
+            const al = i.split(':');
+            const IP = al[0];
+            const PORT = al[1] ? ':' + al[1] : '';
+
+            return { ip: i, alias, IP, PORT };
+        });
         const colCount = this.aliasTitle.length;
         const data = this.dataItem.data;
         let diffTs = 0;
@@ -78,8 +132,8 @@ export class TabFlowComponent implements OnInit, AfterViewInit, OnDestroy {
         this.arrayItems = data.calldata.map((item, key, arr) => {
             diffTs = key - 1 >= 0 && arr[key - 1] !== null ? (item.micro_ts - arr[key - 1].micro_ts) / 1000 : 0;
 
-            const srcPosition = data.hosts[item.srcId].position,
-                dstPosition = data.hosts[item.dstId].position,
+            const srcPosition = hosts[item.srcId].position,
+                dstPosition = hosts[item.dstId].position,
                 course = srcPosition < dstPosition ? 'right' : 'left',
                 position_from = Math.min(srcPosition, dstPosition),
                 position_width = Math.abs(srcPosition - dstPosition),
@@ -92,8 +146,8 @@ export class TabFlowComponent implements OnInit, AfterViewInit, OnDestroy {
                 id: item.id,
                 color_method: color_method,
                 color: Functions.getColorByString(item.sid),
-                micro_ts: moment( item.micro_ts ).format('YYYY-MM-DD HH:mm:ss.sss Z'),
-                diffTs: diffTs.toFixed(2),
+                micro_ts: moment( item.micro_ts).format('YYYY-MM-DD HH:mm:ss.SSS Z'),
+                diffTs: diffTs.toFixed(3),
                 proto: Functions.protoCheck(item.protocol),
                 style: {
                     left: position_from / colCount * 100,

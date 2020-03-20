@@ -1,5 +1,6 @@
-<form *ngIf="isConfig">
-    <div class="example-container" [ngStyle]="{'grid-template-columns': getFieldColumns()}">
+<form *ngIf="isConfig" class="form-container">
+    <div class="inputs-container">
+    <div class="example-container" [ngStyle]="{'grid-template-columns': getFieldColumns(), 'font-size':getFontSize()}">
         <div *ngFor="let item of fields" style="display: block" >
             <!--
                 if item is targetResultsContainer
@@ -103,7 +104,8 @@
             
         </div>
     </div>
-    <div style="float: right;" [className]="buttonState ? 'show' : 'hide'">
+</div>
+    <div class="proto-buttons" [className]="buttonState ? 'show' : 'hide'">
         <button mat-raised-button (click)="onClearFields()">Clear</button>
         <button mat-raised-button color="primary" (click)="doSearchResult()">Search</button>
     </div>
