@@ -13,6 +13,7 @@ export * from './rsearch-widget/code-style-smart-input-field/code-style-smart-in
 export * from './protosearch-widget/drag-drop-list/drag-drop-list.component';
 export * from './result-chart-widget/result-chart-widget.component';
 export * from  './display-chart-d3-widget/display-chart-d3-widget.component';
+export * from './pcap-import-widget/pcap-import-widget.component';
 
 /** setting window */
 export * from './clock-widget/setting-clock-widget.component';
@@ -26,4 +27,5 @@ export * from './dialog-alarm/dialog-alarm.component';
 export * from './result-chart-widget/setting-result-chart-widget.component';
 export * from './display-chart-d3-widget/setting-display-chart-d3-widget.component';
 export * from './result-widget/setting-result-widget.component';
+export * from './pcap-import-widget/setting-pcap-import-widget.component'
 

@@ -1,0 +1,41 @@
+ul,
+li {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+}
+
+#file-label {
+      display: inline-flex;
+      vertical-align: middle;
+      font-size: 12px;
+      line-height: 18px;
+}
+
+#file-label mat-icon {
+      font-size: 18px;
+      text-align: center;
+}
+
+#file-label a {
+      cursor: pointer;
+}
+
+.message{
+    padding:20px;
+    background:#fafafa;
+    color:grey;
+    box-shadow:2px 2px 6px lightgray;
+    line-height:1em;
+    font-size:12px;
+    .header {
+        color:black;
+    }
+}
+.files-container{
+    padding:20px;
+    background:#fafafa;
+    margin:5px;
+    border-radius:3px;
+
+}
