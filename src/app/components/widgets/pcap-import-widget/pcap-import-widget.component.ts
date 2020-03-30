@@ -59,6 +59,23 @@ export class FileUploadModel {
     @Input() accept = 'image/*';
       /** Allow you to add handler after its completion. Bubble up response text from remote. */
     @Output() complete = new EventEmitter<string>();
+    
+    maxfileSize = 6000;
+
+    filesMessage = [];
+    maxFileError = {
+      message:'error',
+      filename: '',
+      fileSize: 0,
+      maxFileSize:0
+    }
+
+    maxfileSuccess = {
+      message: 'success',
+      filename: '',
+      fileSize: 0,
+      maxFileSize:0
+    }
 
     private files: Array<FileUploadModel> = [];
 
@@ -89,14 +106,34 @@ onClick() {
     fileUpload.onchange = () => {
           for (let index = 0; index < fileUpload.files.length; index++) {
                 const file = fileUpload.files[index];
-                this.files.push({ data: file, state: 'in', 
+                if(this.maxfileSize === 0 || file.size <= this.maxfileSize)
+                {
+                  this.files.push({ data: file, state: 'in', 
                   inProgress: false, progress: 0, canRetry: false, canCancel: true });
+                  this.maxfileSuccess.fileSize = file.size;
+                  this.maxfileSuccess.filename = file.name;
+                  this.maxfileSuccess.maxFileSize = this.maxfileSize;
+                  this.filesMessage.push(this.maxfileSuccess);
+                }else{
+                  this.maxFileError.fileSize = file.size;
+                  this.maxFileError.filename = file.name;
+                  this.maxFileError.maxFileSize = this.maxfileSize;
+                  this.filesMessage.push(this.maxFileError)
+                  
+                }
+                
+                console.log(this.files);
           }
+          console.log(this.filesMessage);
           this.uploadFiles();
     };
     fileUpload.click();
 }
-
+getFilesLog(){
+  if (this.filesMessage.length){
+    
+  }
+}
 cancelFile(file: FileUploadModel) {
     file.sub.unsubscribe();
     this.removeFileFromArray(file);
@@ -205,6 +242,7 @@ private removeFileFromArray(file: FileUploadModel) {
     const dialogRef = this.dialog.open(SettingPcapImportWidgetComponent, {
       data: {
         title: this.title || this.id,
+        maxfileSize: this.maxfileSize * 1|| 0
       }
     });
     const result = await dialogRef.afterClosed().toPromise();

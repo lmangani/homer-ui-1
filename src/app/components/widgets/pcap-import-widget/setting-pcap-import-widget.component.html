@@ -6,12 +6,20 @@
 </mat-toolbar>
 
 <div mat-dialog-content>
+    <p>
     <mat-form-field>
         <mat-label>Title</mat-label>
         <input matInput [(ngModel)]="data.title">
     </mat-form-field>
+</p>
 </div>
 
+<p>
+<mat-form-field appearance="outline">
+    <mat-label>File Max size:</mat-label>
+    <input matInput placeholder="file max size">
+  </mat-form-field>
+</p>
 <div mat-dialog-actions style="float: right; margin-bottom: 0rem;">
     <button mat-raised-button (click)="onNoClick()">Cancel</button>
     <button mat-raised-button color="primary" [mat-dialog-close]="data" cdkFocusInitial>Ok</button>
