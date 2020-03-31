@@ -10,7 +10,6 @@ import { ConstValue } from '@app/models';
 import { Functions } from '@app/helpers/functions';
 import { HttpClient, HttpResponse, HttpRequest, HttpEventType, HttpErrorResponse } from '@angular/common/http';
 import { catchError, last, map, tap } from 'rxjs/operators';
-
 export class FileUploadModel {
     data: File;
     state: string;
@@ -56,12 +55,28 @@ export class FileUploadModel {
     @Input() target = 'https://file.io';
       /** File extension that accepted, same as 'accept' of <input type="file" />. 
           By the default, it's set to 'image/*'. */
-    @Input() accept = 'image/*';
+    @Input() accept = 'pcap/*';
       /** Allow you to add handler after its completion. Bubble up response text from remote. */
     @Output() complete = new EventEmitter<string>();
     
     maxfileSize = 50000;
 
+    vizHosts = '' //etherframes.length
+    vizFrames = '' // ipv4hosts.length
+    /* props of handleFileSelect */
+    file;
+    tate = 0;
+    fileposition = 0;
+    ts_sec = 0;
+    ts_usec = 0;
+    ts_firstether = -1;
+    frame = 0;
+   ipv4hosts = [];
+    etherframes = [];
+    /*end props of handleFileSelect */
+
+
+    /* logging props */
     filesLog = {
       maxfileSize:0,
       files: [],
@@ -76,9 +91,9 @@ export class FileUploadModel {
       fileSize: 0,
     }
 
- 
 
-    private files: Array<FileUploadModel> = [];
+
+    private files = [] //Array<FileUploadModel> = [];
 
     title: any;
     subsDashboardEvent: Subscription;
@@ -99,12 +114,65 @@ export class FileUploadModel {
        
         ) { }
 
-/** Upload methods */
+/** PCAP to hep Upload methods */
+// Ref: https://github.com/lmangani/pcap2hep
+// process packet must be part of the api because of js native methods
+// @ TODO: import the proxy handlers as services
+/** Error handlers */
+errorHandler( evt ):any {
+  switch ( evt.target.error.code )
+  {
+  case evt.target.error.NOT_FOUND_ERR:
+    alert( 'File Not Found!' );
+    break;
+  case evt.target.error.NOT_READABLE_ERR:
+    alert( 'File is not readable' );
+    break;
+  case evt.target.error.ABORT_ERR:
+    break; // noop
+  default:
+    alert( 'An error occurred reading this file.' );
+  };
+}
+
+fileAbortHandler (e):any {
+  e.preventDefault();
+  alert( 'File read cancelled' );
+}
+toHex( d )
+{
+  return ( "0" + ( Number( d ).toString( 16 ) ) ).slice( -2 ).toUpperCase()
+}
+
+/** File handlers */
+
+handleFileSelect(e) {
+
+  let files = e.target.files; // FileList object
+  let reader: FileReader = new FileReader()
+  reader.onerror = this.errorHandler(e);
+  // TODO: map onabort event stoping the file list
+  reader.onabort = this.fileAbortHandler(e);
+  // *fileProcessor method
+
+  let file = files[ 0 ];
+  let  blob = file.slice( this.fileposition, this.fileposition + 24 );
+  this.fileposition += 24;
+  reader.readAsArrayBuffer( blob );
+// TODO: next => add this to the onClick.fileUpload.onchange
+}
+
+fileProcessor(e){
+  
+}
+
+/**   end pcap methods */ 
 
 
 onClick() {
     const fileUpload = document.getElementById('fileUpload') as HTMLInputElement;
-    fileUpload.onchange = () => {
+    fileUpload.onchange = (e) => {
+      console.log(fileUpload)
       this.filesLog.maxfileSize = this.maxfileSize;
           for (let index = 0; index < fileUpload.files.length; index++) {
                 const file = fileUpload.files[index];
@@ -196,6 +264,8 @@ private removeFileFromArray(file: FileUploadModel) {
           this.files.splice(index, 1);
     }
 }
+
+
 
 /** end upload methods */
      
