@@ -1,31 +1,46 @@
 <div class="container" (complete)="onFileComplete($event)">
-    <div class="message">
-        <p class="header">Import <strong>PCAP </strong>files</p>
-        <p>Select from origin and import to server.</p>
-        <p>You will get a link to imported files.</p>
-    </div>
   
 <div class="files-container">
-    <button mat-button color="warn" (click)="onClick()">
+    <button mat-button color="warn" (click)="onClick()" class="upload-button">
         <mat-icon>file_upload</mat-icon>
         {{text}}
     </button>
     <br/>
-    <ul>
-        <li *ngFor="let file of files" [@fadeInOut]="file.state">
-              <mat-progress-bar [value]="file.progress"></mat-progress-bar>
-              <span id="file-label">
-              {{file.data.name}} 
-              <a title="Retry" (click)="retryFile(file)" *ngIf="file.canRetry">
-              <mat-icon>refresh</mat-icon></a>
-              <a title="Cancel" (click)="cancelFile(file)" *ngIf="file.canCancel">
-              <mat-icon>cancel</mat-icon></a>
-              </span>
+    <ul class="file-uploads">
+        <p *ngIf="files.length > 0" class="files-title">{{files.length}} Files uploaded</p>
+        <li *ngFor="let file of files" >
+              <mat-progress-bar mode="determinate" [value]="file.progress"></mat-progress-bar>
+              <div class="file-options" id="file-label">
+                
+                    <p style="color: grey; letter-spacing:1px; font-size:10px;">{{file.data.name}} </p>
+                    <div>
+                        <a title="Retry" (click)="retryFile(file)" *ngIf="file.canRetry">
+                            <mat-icon>refresh</mat-icon></a>
+                            <a title="Cancel" (click)="cancelFile(file)" *ngIf="file.canCancel">
+                            <mat-icon>cancel</mat-icon></a>
+                    </div>
+              </div>
+              
         </li>
     </ul>
     <input type="file" id="fileUpload" name="fileUpload" multiple="multiple" 
     
     accept="{{accept}}" style="display:none;"/>
 </div>
-
+<div *ngIf="filesLog.files.length > 0" class="log">
+    <h2>Files log</h2>
+    <div class="log-data">
+        <p>Max file size: {{filesLog.maxfileSize}}</p>
+    <p>Total: {{filesLog.total}} success: {{filesLog.success}} error: {{filesLog.error}}</p>
+    </div>
+    <div class="log-messages" *ngFor="let file of filesLog.files">
+      <div class="file-name">
+        <p><strong>{{file.filename}}</strong></p> 
+        <strong *ngIf="file.message === 'error'" class="col-warning">{{file.message}}</strong>
+        <strong *ngIf="file.message === 'success'" class="col-success">{{file.message}}</strong>
+      </div>  
+        <p><strong>File size:</strong> {{file.fileSize}}  
+        </div>
+  
+    </div>
 </div>

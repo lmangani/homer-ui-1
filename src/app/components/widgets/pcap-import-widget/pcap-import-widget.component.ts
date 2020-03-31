@@ -60,22 +60,23 @@ export class FileUploadModel {
       /** Allow you to add handler after its completion. Bubble up response text from remote. */
     @Output() complete = new EventEmitter<string>();
     
-    maxfileSize = 6000;
+    maxfileSize = 50000;
 
-    filesMessage = [];
-    maxFileError = {
-      message:'error',
+    filesLog = {
+      maxfileSize:0,
+      files: [],
+      total:0,
+      success: 0,
+      error:0
+    };
+
+    fileLog = {
+      message:'',
       filename: '',
       fileSize: 0,
-      maxFileSize:0
     }
 
-    maxfileSuccess = {
-      message: 'success',
-      filename: '',
-      fileSize: 0,
-      maxFileSize:0
-    }
+ 
 
     private files: Array<FileUploadModel> = [];
 
@@ -104,36 +105,36 @@ export class FileUploadModel {
 onClick() {
     const fileUpload = document.getElementById('fileUpload') as HTMLInputElement;
     fileUpload.onchange = () => {
+      this.filesLog.maxfileSize = this.maxfileSize;
           for (let index = 0; index < fileUpload.files.length; index++) {
                 const file = fileUpload.files[index];
+                const log = {...this.fileLog}
+                log.filename = file.name;
+                log.fileSize = file.size;
+                
                 if(this.maxfileSize === 0 || file.size <= this.maxfileSize)
                 {
+                  log.message = 'success';
+                  this.filesLog.success += 1
                   this.files.push({ data: file, state: 'in', 
                   inProgress: false, progress: 0, canRetry: false, canCancel: true });
-                  this.maxfileSuccess.fileSize = file.size;
-                  this.maxfileSuccess.filename = file.name;
-                  this.maxfileSuccess.maxFileSize = this.maxfileSize;
-                  this.filesMessage.push(this.maxfileSuccess);
+                 
                 }else{
-                  this.maxFileError.fileSize = file.size;
-                  this.maxFileError.filename = file.name;
-                  this.maxFileError.maxFileSize = this.maxfileSize;
-                  this.filesMessage.push(this.maxFileError)
+                  log.message = 'error'
+                  this.filesLog.error += 1
                   
                 }
-                
+                this.filesLog.files.push(log)
                 console.log(this.files);
+                this.filesLog.total += 1
+               
           }
-          console.log(this.filesMessage);
+          console.log(this.filesLog);
           this.uploadFiles();
     };
     fileUpload.click();
 }
-getFilesLog(){
-  if (this.filesMessage.length){
-    
-  }
-}
+
 cancelFile(file: FileUploadModel) {
     file.sub.unsubscribe();
     this.removeFileFromArray(file);
