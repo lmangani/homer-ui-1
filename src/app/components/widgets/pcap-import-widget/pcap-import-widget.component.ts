@@ -65,7 +65,7 @@ export class FileUploadModel {
     vizFrames = '' // ipv4hosts.length
     /* props of handleFileSelect */
     file;
-    tate = 0;
+    state = 0;
     fileposition = 0;
     ts_sec = 0;
     ts_usec = 0;
@@ -75,7 +75,7 @@ export class FileUploadModel {
     etherpacket:any = {};
     etherframes = [];
     reader: FileReader = new FileReader()
-    state
+  
    
     /*end props of handleFileSelect */
 
@@ -118,13 +118,41 @@ export class FileUploadModel {
        
         ) { }
 
+        ngOnInit() {
+          WidgetArrayInstance[this.id] = this as IWidget; 
+          this.config = {
+            name: 'pcap-import',
+           config: this.config
+          }
+      
+      
+        if (!this.config) {
+            this.title = this.config.title || 'PCAP IMPORT';
+         
+        }
+        this.subsDashboardEvent = this._dashboardService.dashboardEvent.subscribe(this.onDashboardEvent.bind(this));
+        
+        }
+      
+        private async onDashboardEvent(data: any) {
+          const dataId = data.resultWidget[this.id];
+          if (dataId && dataId.query) {
+            if (this.lastTimestamp * 1 === dataId.timestamp * 1) {
+              return;
+            }
+            this.lastTimestamp = dataId.timestamp * 1;
+            this.localData = dataId.query;
+          }
+       
+        }
+
 /** PCAP to hep Upload methods */
 // Ref: https://github.com/lmangani/pcap2hep
 // process packet must be part of the api because of js native methods
 // @ TODO: import the proxy handlers as services
 /** Error handlers */
 errorHandler( evt ):any {
-  switch ( evt.target.error.code )
+  switch ( evt.target.error )
   {
   case evt.target.error.NOT_FOUND_ERR:
     alert( 'File Not Found!' );
@@ -152,30 +180,29 @@ toHex( d )
 
 handleFileSelect(e) {
 
-  let files = e.target.files; // FileList object
+// FileList object
+  let files = e.target['files']; // FileList object
  //let reader: FileReader = new FileReader()
-  this.reader.onerror = this.errorHandler(e);
+//this.reader.onerror = this.errorHandler(e);
   // TODO: map onabort event stoping the file list
-  this.reader.onabort = this.fileAbortHandler(e);
+  //this.reader.onabort = this.fileAbortHandler(e);
   // *fileProcessor method
-
+  this.reader.onload = (e) => this.fileProcessor(e);
   this.file = files[ 0 ];
   let  blob = this.file.slice( this.fileposition, this.fileposition + 24 );
+  console.log(blob, 'blob');
   this.fileposition += 24;
   this.reader.readAsArrayBuffer( blob );
 // TODO: next => add this to the onClick.fileUpload.onchange
 }
 
 fileProcessor(e){
-    var data = e.currentTarget.result;
-
+    var data = e.currentTarget.result
     switch ( this.state )
     {
     case 0:
       var uint32array = new Uint32Array( data );
-     // var int32array = new Int32Array( data );
-      // Do we need version info for now?
-      //var uint16array = new Uint16Array(data);
+
       /* Magic number */
       //  TODO: try to switch this messages on log */
 
@@ -337,6 +364,7 @@ fileProcessor(e){
       }
       else
       {
+        console.log('We probbaly won\'t need this as is raw length.')
         // We probbaly won't need this as is raw length.
       }
       // here can return the etherframes to push
@@ -345,6 +373,7 @@ fileProcessor(e){
       {
         // send the parsed data to view
         //drawGraph( etherframes, ipv4hosts );
+        console.log(this.etherframes.length,'etherframes length', this.ipv4hosts, 'more than 100')
         return;
       }
       var blob = this.file.slice( this.fileposition, this.fileposition + 16 );
@@ -353,6 +382,7 @@ fileProcessor(e){
       {
         // send the parsed data to view
       //  drawGraph( etherframes, ipv4hosts );
+      console.log(this.etherframes.length,': etherframes length', this.ipv4hosts,'file position greater than file size')
         return;
       }
       this.reader.readAsArrayBuffer( blob );
@@ -361,21 +391,21 @@ fileProcessor(e){
     }
   }
 
-
 /**   end pcap methods */ 
-
 
 onClick() {
     const fileUpload = document.getElementById('fileUpload') as HTMLInputElement;
     fileUpload.onchange = (e) => {
-      console.log(fileUpload)
+  
+    this.handleFileSelect(e)
+
       this.filesLog.maxfileSize = this.maxfileSize;
           for (let index = 0; index < fileUpload.files.length; index++) {
                 const file = fileUpload.files[index];
                 const log = {...this.fileLog}
                 log.filename = file.name;
                 log.fileSize = file.size;
-                
+                // @ TODO: integrate error / log handlers
                 if(this.maxfileSize === 0 || file.size <= this.maxfileSize)
                 {
                   log.message = 'success';
@@ -391,10 +421,11 @@ onClick() {
                 this.filesLog.files.push(log)
                 console.log(this.files);
                 this.filesLog.total += 1
-               
           }
+
           console.log(this.filesLog);
-          this.uploadFiles();
+          
+          //this.uploadFiles();
     };
     fileUpload.click();
 }
@@ -461,37 +492,7 @@ private removeFileFromArray(file: FileUploadModel) {
     }
 }
 
-
-
 /** end upload methods */
-     
-  ngOnInit() {
-    WidgetArrayInstance[this.id] = this as IWidget; 
-    this.config = {
-      name: 'pcap-import',
-     config: this.config
-    }
-
-
-  if (!this.config) {
-      this.title = this.config.title || 'PCAP IMPORT';
-   
-  }
-  this.subsDashboardEvent = this._dashboardService.dashboardEvent.subscribe(this.onDashboardEvent.bind(this));
-  
-  }
-
-  private async onDashboardEvent(data: any) {
-    const dataId = data.resultWidget[this.id];
-    if (dataId && dataId.query) {
-      if (this.lastTimestamp * 1 === dataId.timestamp * 1) {
-        return;
-      }
-      this.lastTimestamp = dataId.timestamp * 1;
-      this.localData = dataId.query;
-    }
- 
-  }
 
   private saveConfig() {
     const _f = Functions.cloneObject;
@@ -522,6 +523,7 @@ private removeFileFromArray(file: FileUploadModel) {
 
   onFileComplete(data: any) {
     console.log(data); // We just print out data bubbled up from event emitter.
+    // here goes the call to proxy
   }
 
   ngOnDestroy() {
