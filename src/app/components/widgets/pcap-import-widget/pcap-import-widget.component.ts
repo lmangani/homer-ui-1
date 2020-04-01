@@ -48,11 +48,11 @@ export class FileUploadModel {
     @Input() config: any;
     @Output() changeSettings = new EventEmitter < any > ();
       /** Link text */
-    @Input() text = 'Upload';
+    @Input() text = 'Import PCAP files';
       /** Name used in form which will be sent in HTTP request. */
     @Input() param = 'file';
       /** Target URL for file uploading. */
-    @Input() target = 'https://file.io';
+    @Input() target = 'https://file.io';  // WONT BE USED
       /** File extension that accepted, same as 'accept' of <input type="file" />. 
           By the default, it's set to 'image/*'. */
     @Input() accept = 'pcap/*';
@@ -198,6 +198,7 @@ handleFileSelect(e) {
 
 fileProcessor(e){
     var data = e.currentTarget.result
+    console.log(data);
     switch ( this.state )
     {
     case 0:
@@ -364,7 +365,7 @@ fileProcessor(e){
       }
       else
       {
-        console.log('We probbaly won\'t need this as is raw length.')
+       
         // We probbaly won't need this as is raw length.
       }
       // here can return the etherframes to push
@@ -380,7 +381,7 @@ fileProcessor(e){
       this.fileposition += 16;
       if ( this.fileposition > this.file.size )
       {
-        // send the parsed data to view
+        // send the parsed data to view send the frames and the hosts count if it's less than 100
       //  drawGraph( etherframes, ipv4hosts );
       console.log(this.etherframes.length,': etherframes length', this.ipv4hosts,'file position greater than file size')
         return;
@@ -440,6 +441,7 @@ retryFile(file: FileUploadModel) {
     file.canRetry = false;
 }
 
+// @TODO: integrate this with the proxy service method
 private uploadFile(file: FileUploadModel) {
     const fd = new FormData();
     fd.append(this.param, file.data);
