@@ -1,9 +1,9 @@
 
 import { Injectable } from '@angular/core';
-//import {encapsulate} from 'hep-js/bundle';
-import {encapsulate} from 'hep-js';
+import { hep } from 'hep-js';
+
 //import * as SIP from 'sipcore/dist/client';
-import { Buffer } from 'buffer/client';
+import { Buffer } from 'buffer';
 
 @Injectable({
     providedIn:'root'
@@ -33,7 +33,6 @@ decoded = {
     ts_sec:'0'
 }
 
-heparray
 
 hep_proto:any = { 
     "type": "HEP", 
@@ -50,18 +49,24 @@ hep_proto:any = {
 
   
     sendHep3(txt, rcinfo){
-      console.log(JSON.stringify(encapsulate));
+     
         this.connection =  new WebSocket('ws://my-server/api/v3/ws');
         this.connection.onopen =  () => {
   
-            this.connection.binaryType = 'arraybuffer';
+            this.connection.binaryType = 'Buffer';
           }
         if(rcinfo ) {
             try {
-                var hep_message = encapsulate(txt,rcinfo)
+                var global = global || window;
+                global.Buffer = global.Buffer || require("buffer").Buffer;
+                // Browser Support: make process, that emulates node's Process API, available globally in the browser
+                global.process = global.process || require("process");
+                console.log(JSON.stringify(hep.encapsulate));
+                var hep_message = hep.encapsulate(txt,rcinfo)
                 console.log(hep_message)
                 if(hep_message) {
-                    let packet = Buffer.from(hep_message);
+                   let packet =  Buffer.from(hep_message)
+                   
                     this.connection.send(packet);
             }
         }
