@@ -51,7 +51,7 @@ hep_proto:any = {
   
     sendHep3(txt, rcinfo){
       console.log(JSON.stringify(encapsulate));
-        this.connection =  new WebSocket('ws://207.38.65.199:80/api/v3/ws');
+        this.connection =  new WebSocket('ws://my-server/api/v3/ws');
         this.connection.onopen =  () => {
   
             this.connection.binaryType = 'arraybuffer';
