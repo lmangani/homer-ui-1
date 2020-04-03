@@ -15,7 +15,7 @@ var HEP = require('hep-js');
 var SIP = require('sipcore');
 
 connection.onopen = function () {
-  connection.binaryType = 'Buffer';
+  connection.binaryType = 'arraybuffer';
 };
 
 /* HEP3 Socket OUT */

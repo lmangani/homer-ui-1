@@ -10,6 +10,8 @@ import { ConstValue } from '@app/models';
 import { Functions } from '@app/helpers/functions';
 import { HttpClient, HttpResponse, HttpRequest, HttpEventType, HttpErrorResponse } from '@angular/common/http';
 import { catchError, last, map, tap } from 'rxjs/operators';
+import { PcapImportService } from './pcap-import.service';
+
 export class FileUploadModel {
     data: File;
     state: string;
@@ -49,6 +51,8 @@ export class FileUploadModel {
     @Output() changeSettings = new EventEmitter < any > ();
       /** Link text */
     @Input() text = 'Import PCAP files';
+    /** send HEP to server text */
+    @Input() send_text = 'Send HEP to server';
       /** Name used in form which will be sent in HTTP request. */
     @Input() param = 'file';
       /** Target URL for file uploading. */
@@ -84,6 +88,8 @@ export class FileUploadModel {
     filesLog = {
       maxfileSize:0,
       files: [],
+      hosts:[],
+      frames:0,
       total:0,
       success: 0,
       error:0
@@ -113,7 +119,8 @@ export class FileUploadModel {
     constructor(
         public dialog: MatDialog,
         private _dashboardService : DashboardService,
-        private _http: HttpClient
+        private _http: HttpClient,
+        public _pcap : PcapImportService
     
        
         ) { }
@@ -190,7 +197,6 @@ handleFileSelect(e) {
   this.reader.onload = (e) => this.fileProcessor(e);
   this.file = files[ 0 ];
   let  blob = this.file.slice( this.fileposition, this.fileposition + 24 );
-  console.log(blob, 'blob');
   this.fileposition += 24;
   this.reader.readAsArrayBuffer( blob );
 // TODO: next => add this to the onClick.fileUpload.onchange
@@ -198,7 +204,6 @@ handleFileSelect(e) {
 
 fileProcessor(e){
     var data = e.currentTarget.result
-    console.log(data);
     switch ( this.state )
     {
     case 0:
@@ -374,7 +379,7 @@ fileProcessor(e){
       {
         // send the parsed data to view
         //drawGraph( etherframes, ipv4hosts );
-        console.log(this.etherframes.length,'etherframes length', this.ipv4hosts, 'more than 100')
+        this.sendBufferData(this.etherframes, this.ipv4hosts);
         return;
       }
       var blob = this.file.slice( this.fileposition, this.fileposition + 16 );
@@ -383,7 +388,7 @@ fileProcessor(e){
       {
         // send the parsed data to view send the frames and the hosts count if it's less than 100
       //  drawGraph( etherframes, ipv4hosts );
-      console.log(this.etherframes.length,': etherframes length', this.ipv4hosts,'file position greater than file size')
+      this.sendBufferData(this.etherframes, this.ipv4hosts);
         return;
       }
       this.reader.readAsArrayBuffer( blob );
@@ -392,6 +397,18 @@ fileProcessor(e){
     }
   }
 
+// drawGraph function 
+sendBufferData(frames, hosts){
+  this.filesLog.frames = frames.length;
+  if(frames.length > 99){
+    this.filesLog.hosts = [];
+  }
+this.filesLog.hosts.push(hosts);
+}
+
+sendHep(){
+  this._pcap.processFrames(this.etherframes);
+}
 /**   end pcap methods */ 
 
 onClick() {
