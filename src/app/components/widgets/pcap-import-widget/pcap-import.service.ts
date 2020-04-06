@@ -1,8 +1,6 @@
 
 import { Injectable } from '@angular/core';
 import { hep } from 'hep-js';
-
-//import * as SIP from 'sipcore/dist/client';
 import { Buffer } from 'buffer';
 
 @Injectable({
@@ -10,10 +8,12 @@ import { Buffer } from 'buffer';
 })
 export class PcapImportService {
 
-url = ''
-
+// web socket endpoint inside server
+// @TODO add token to requests
+ws = 'ws://my-server/api/v3/ws'
 
 connection 
+
 decoded = {
     ipv4 : {
         tcp:{
@@ -47,26 +47,22 @@ hep_proto:any = {
 
     }
 
-  
-    sendHep3(txt, rcinfo){
-     
-        this.connection =  new WebSocket('ws://my-server/api/v3/ws');
+    sendHep3(payload, rcinfo){
+        this.connection =  new WebSocket(this.ws);
         this.connection.onopen =  () => {
-  
             this.connection.binaryType = 'Buffer';
           }
         if(rcinfo ) {
             try {
+                // Browser Support: make process, that emulates node's Process API, available globally in the browser
                 var global = global || window;
                 global.Buffer = global.Buffer || require("buffer").Buffer;
-                // Browser Support: make process, that emulates node's Process API, available globally in the browser
                 global.process = global.process || require("process");
-                console.log(JSON.stringify(hep.encapsulate));
-                var hep_message = hep.encapsulate(txt,rcinfo)
+                var hep_message = hep.encapsulate(payload,rcinfo)
                 console.log(hep_message)
                 if(hep_message) {
                    let packet =  Buffer.from(hep_message)
-                   
+                   console.log(packet);
                     this.connection.send(packet);
             }
         }
@@ -75,8 +71,6 @@ hep_proto:any = {
         }
      }
     }
-
- 
 
     processPacket(msg){
         try { this.decoded = JSON.parse(msg) } catch { this.decoded = msg }
@@ -110,8 +104,6 @@ hep_proto:any = {
         }
     }
     processFrames(frames){
-      
         frames.forEach(frame => this.processPacket(frame))
-        
       }
 }
