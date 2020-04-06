@@ -1,7 +1,7 @@
 
 import { Injectable } from '@angular/core';
-import { hep } from 'hep-js';
-import { Buffer } from 'buffer';
+import { hep } from './modules/hep-js';
+import { Buffer } from './modules/buffer';
 
 @Injectable({
     providedIn:'root'
@@ -10,7 +10,7 @@ export class PcapImportService {
 
 // web socket endpoint inside server
 // @TODO add token to requests
-ws = 'ws://my-server/api/v3/ws'
+ws = 'ws://de4.sipcapture.io:8060'
 
 connection 
 
@@ -51,25 +51,26 @@ hep_proto:any = {
         this.connection =  new WebSocket(this.ws);
         this.connection.onopen =  () => {
             this.connection.binaryType = 'Buffer';
-          }
-        if(rcinfo ) {
-            try {
-                // Browser Support: make process, that emulates node's Process API, available globally in the browser
-                var global = global || window;
-                global.Buffer = global.Buffer || require("buffer").Buffer;
-                global.process = global.process || require("process");
-                var hep_message = hep.encapsulate(payload,rcinfo)
-                console.log(hep_message)
-                if(hep_message) {
-                   let packet =  Buffer.from(hep_message)
-                   console.log(packet);
+            if(rcinfo ) {
+                try {
+                    // Browser Support: make process, that emulates node's Process API, available globally in the browser
+                    var global = global || window;
+                    global.Buffer = global.Buffer || require("buffer").Buffer;
+                    global.process = global.process || require("process");
+                    var hep_message = hep.encapsulate(payload,rcinfo)
+                    console.log(hep_message)
+                    if(hep_message) {
+                    let packet =  Buffer.from(hep_message)
+                    console.log(packet);
                     this.connection.send(packet);
+                }
             }
-        }
-        catch (err) {
-            console.log('HEP3 Error sending to web socket!',err)
-        }
+            catch (err) {
+                console.log('HEP3 Error sending to web socket!',err)
+            }
+         }
      }
+ 
     }
 
     processPacket(msg){
